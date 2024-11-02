@@ -30,7 +30,7 @@ bash install-k3s.sh
 
 ## Workerノードにロールを付与
 
-bradminで実施する
+全てのノードをセットアップし終えた後に、bradminで実施する
 
 ```shell
 bash roleup-k3s.sh
