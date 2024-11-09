@@ -1,0 +1,9 @@
+---
+- name: Remove snap package
+  include_tasks: remove_snap.yaml
+
+- name: Execute RaspberryPi system configuration tasks
+  include_tasks: system_configure.yaml
+
+- name: Blacklist storage devices in multipath configuration
+  include_tasks: multipath_blacklist.yaml

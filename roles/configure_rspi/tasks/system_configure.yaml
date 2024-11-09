@@ -1,0 +1,45 @@
+---
+- name: Append hosts
+  blockinfile:
+    path: /etc/hosts
+    marker: "# {mark} Append by ansible"
+    block: "127.0.1.1 {{ hostname }}"
+    owner: root
+    group: root
+    mode: 0644
+    state: present
+
+- name: Remove symlink resolv.conf
+  file:
+    path: "path=/etc/resolv.conf"
+    state: absent
+
+- name: Copy resolv.conf file
+  copy:
+    dest: /etc/resolv.conf
+    src: files/resolv.conf
+    owner: root
+    group: root
+    mode: 0644
+    backup: true
+
+- name: Change default GPU Memory Split
+  blockinfile:
+    path: /boot/firmware/config.txt
+    marker: "# {mark} Append by ansible"
+    block: "gpu_mem=16"
+    owner: root
+    group: root
+    mode: 0755
+    state: present
+
+- name: Change NTP server
+  replace: >-
+    dest="/etc/systemd/timesyncd.conf"
+    regexp="#NTP="
+    replace="NTP=ntp.{{ dns_domain }}"
+
+- name: Set timezone to Asia/Tokyo
+  community.general.timezone:
+    name: Asia/Tokyo
+  notify: reboot

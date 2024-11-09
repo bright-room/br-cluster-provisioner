@@ -1,0 +1,58 @@
+---
+- name: Create keyrings directory
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Download Docker GPG key
+  get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
+
+- name: Add Docker repository
+  apt_repository:
+    repo: "deb [arch={{ my_os_arch_arm_centric }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    state: present
+    filename: docker
+    update_cache: yes
+
+- name: Install docker packages
+  apt:
+    name: "{{ packages }}"
+    update_cache: true
+    state: present
+  vars:
+    packages:
+      - "docker-ce"
+      - "docker-ce-cli"
+      - "containerd.io"
+      - "docker-buildx-plugin"
+      - "docker-compose-plugin"
+
+- name: Create group if not exists
+  group:
+    name: docker
+    state: present
+
+- name: Add user to a single group
+  user:
+    name: bradmin
+    groups: docker
+    append: yes
+
+- name: Copy daemon.json file
+  copy:
+    dest: /etc/docker/daemon.json
+    src: files/daemon.json
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Restart Docker service
+  systemd:
+    name: docker
+    state: restarted
+    daemon_reload: yes
+  notify: reboot

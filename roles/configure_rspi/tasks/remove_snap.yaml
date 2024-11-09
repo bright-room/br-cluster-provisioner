@@ -1,0 +1,11 @@
+---
+# reference https://github.com/ricsanfre/pi-cluster/blob/b42c6040e02666e1c362044c6291ad9349c356b8/ansible/roles/basic_setup/tasks/remove_snap.yaml
+- name: Remove Snap Packages
+  include_tasks: remove_snap_packages.yaml
+
+- name: Remove snapd package
+  apt:
+    name: snapd
+    update_cache: true
+    autoremove: true
+    state: absent

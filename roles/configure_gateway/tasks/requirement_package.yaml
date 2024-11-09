@@ -1,0 +1,33 @@
+---
+- name: Configure iptables-persistent debconf settings
+  debconf:
+    name: iptables-persistent
+    question: "{{ item.question }}"
+    value: "{{ item.value }}"
+    vtype: boolean
+  loop:
+    - { question: 'iptables-persistent/autosave_v4', value: 'true' }
+    - { question: 'iptables-persistent/autosave_v6', value: 'true' }
+
+- name: Remove packages
+  apt:
+    name: "needrestart"
+    state: absent
+
+- name: Install requirement packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - "git"
+      - "dnsutils"
+      - "curl"
+      - "ca-certificates"
+      - "gnupg"
+      - "netfilter-persistent"
+      - "iptables-persistent"
+      - "nftables"
+      - "lsof"
+      - "net-tools"
+      - "jq"

@@ -1,2 +1,6 @@
 ---
 ansible_user: bradmin
+
+# DNS
+dns_server: 10.0.0.1
+dns_domain: bright-room.net
