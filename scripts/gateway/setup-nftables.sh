@@ -44,7 +44,7 @@ define badcast_addr = { 255.255.255.255, 224.0.0.1, 224.0.0.251 }
 define ip6_badcast_addr = { ff02::16 }
 
 # インバウンドを許可するTCP通信
-define in_tcp_accept = { ssh, https, http, 2379, 6443 }
+define in_tcp_accept = { ssh, https, http, iscsi-target, 2379, 6443 }
 
 # インバウンドを許可するUDP通信
 define in_udp_accept = { snmp, domain, ntp, bootps }
@@ -207,3 +207,5 @@ netfilter-persistent save
 
 # 自動起動を有効にする
 systemctl enable nftables
+
+# nft list ruleset
