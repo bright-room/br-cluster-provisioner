@@ -1,0 +1,6 @@
+---
+hostname: "br-node3"
+ansible_host: "172.22.10.62"
+ansible_ssh_private_key_file: "~/.ssh/br-node3"
+ip: "172.22.10.62"
+mac: "d8:3a:dd:75:f8:b5"
