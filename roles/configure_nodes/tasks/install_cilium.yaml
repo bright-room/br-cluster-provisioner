@@ -1,0 +1,48 @@
+---
+- name: Get system architecture
+  command: uname -m
+  register: system_arch
+  changed_when: false
+
+- name: Get latest Cilium CLI version
+  uri:
+    url: https://raw.githubusercontent.com/cilium/cilium-cli/master/stable.txt
+    return_content: yes
+  register: cilium_version
+
+- name: Create temporary directory for Cilium CLI
+  file:
+    path: /tmp/cilium-cli
+    state: directory
+    mode: '0755'
+
+- name: Download Cilium CLI archive
+  get_url:
+    url: "https://github.com/cilium/cilium-cli/releases/download/{{ cilium_version.content | trim }}/cilium-linux-{{ system_arch.stdout }}.tar.gz"
+    dest: "/tmp/cilium-cli/cilium-linux-{{ system_arch.stdout }}.tar.gz"
+    mode: '0644'
+
+- name: Download Cilium CLI checksum
+  get_url:
+    url: "https://github.com/cilium/cilium-cli/releases/download/{{ cilium_version.content | trim }}/cilium-linux-{{ system_arch.stdout }}.tar.gz.sha256sum"
+    dest: "/tmp/cilium-cli/cilium-linux-{{ system_arch.stdout }}.tar.gz.sha256sum"
+    mode: '0644'
+
+- name: Verify Cilium CLI checksum
+  command: sha256sum --check cilium-linux-{{ system_arch.stdout }}.tar.gz.sha256sum
+  args:
+    chdir: /tmp/cilium-cli
+  register: checksum_result
+  failed_when: checksum_result.rc != 0
+  changed_when: false
+
+- name: Extract Cilium CLI to /usr/local/bin
+  unarchive:
+    src: "/tmp/cilium-cli/cilium-linux-{{ system_arch.stdout }}.tar.gz"
+    dest: /usr/local/bin
+    remote_src: yes
+
+- name: Clean up Cilium CLI temporary files
+  file:
+    path: /tmp/cilium-cli
+    state: absent
