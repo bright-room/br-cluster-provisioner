@@ -1,0 +1,58 @@
+---
+- name: Create group if not exists
+  group:
+    name: docker
+    state: present
+
+- name: Add user to a single group
+  user:
+    name: bradmin
+    groups: docker
+    append: yes
+
+- name: Copy daemon.json file
+  copy:
+    dest: /etc/docker/daemon.json
+    src: files/daemon.json
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Restart Docker service
+  systemd:
+    name: docker
+    state: restarted
+    daemon_reload: yes
+
+- name: Directory created
+  file:
+    path: /work/br-cluster-gateway-services
+    state: directory
+    owner: bradmin
+    group: bradmin
+    recurse: yes
+
+- name: Git clone
+  ansible.builtin.git:
+    repo: https://github.com/bright-room/br-cluster-gateway-services.git
+    dest: /work/br-cluster-gateway-services
+
+- name: Run pull & build
+  become: false
+  shell: |
+    cd /work/br-cluster-gateway-services
+    docker compose build
+    docker compose pull
+
+- name: Disable systemd-resolved
+  systemd:
+    name: systemd-resolved
+    state: stopped
+    enabled: no
+  notify: reboot
+
+- name: Run gateway
+  become: false
+  shell: |
+    cd /work/br-cluster-gateway-services
+    docker compose up -d

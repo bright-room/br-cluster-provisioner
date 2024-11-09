@@ -1,0 +1,14 @@
+---
+- name: Configure bright-room Cluster Gateway
+  hosts: gateway
+  gather_facts: true
+  become: true
+
+  pre_tasks:
+    - name: package update
+      include_tasks: tasks/update.yaml
+
+  roles:
+    - role: configure_rspi
+    - role: configure_gateway
+    - role: ipr-cnrs.nftables
