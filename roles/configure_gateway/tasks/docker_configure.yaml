@@ -1,4 +1,29 @@
 ---
+- name: Create group if not exists
+  group:
+    name: docker
+    state: present
+
+- name: Add user to a single group
+  user:
+    name: bradmin
+    groups: docker
+    append: yes
+
+- name: Copy daemon.json file
+  copy:
+    dest: /etc/docker/daemon.json
+    src: files/daemon.json
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Restart Docker service
+  systemd:
+    name: docker
+    state: restarted
+    daemon_reload: yes
+
 - name: Directory created
   file:
     path: /work/br-cluster-gateway-services
@@ -24,8 +49,9 @@
     name: systemd-resolved
     state: stopped
     enabled: no
+  notify: reboot
 
-- name: Run pull & build
+- name: Run gateway
   become: false
   shell: |
     cd /work/br-cluster-gateway-services

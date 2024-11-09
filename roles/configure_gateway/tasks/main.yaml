@@ -1,12 +1,9 @@
 ---
-- name: Execute gateway network configuration tasks
-  include_tasks: network_configure.yaml
-
 - name: Execute install requirement package tasks
   include_tasks: requirement_package.yaml
 
-- name: Execute docker setup tasks
-  include_tasks: docker_setup.yaml
+- name: Execute gateway network configuration tasks
+  include_tasks: network_configure.yaml
 
-- name: Start gateway tasks
-  include_tasks: start_gateway.yaml
+- name: Execute docker configuration tasks
+  include_tasks: docker_configure.yaml
