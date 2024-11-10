@@ -1,0 +1,26 @@
+---
+- name: Set CoreDNS base variables
+  set_fact:
+    coredns_version: "1.11.3"
+    os_arch: "arm64"
+
+- name: Download CoreDNS archive
+  get_url:
+    url: "https://github.com/coredns/coredns/releases/download/v{{ coredns_version }}/coredns_{{ coredns_version }}_linux_{{ os_arch }}.tgz"
+    dest: "{{ tmp_dir }}/coredns_{{ coredns_version }}_linux_{{ os_arch }}.tgz"
+    mode: "0644"
+
+- name: "Extract CoreDNS to {{ tmp_dir }}"
+  unarchive:
+    src: "{{ tmp_dir }}/coredns_{{ coredns_version }}_linux_{{ os_arch }}.tgz"
+    dest: "{{ tmp_dir }}"
+    remote_src: yes
+
+- name: "Copy CoreDNS binary to {{ install_dir }}"
+  copy:
+    src: "{{ item.source }}"
+    dest: "{{ item.target }}"
+    remote_src: yes
+  with_items:
+    - source: "{{ tmp_dir }}/coredns"
+      target: "{{ install_dir }}/coredns"

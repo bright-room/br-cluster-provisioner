@@ -5,7 +5,7 @@
   register: multipath_file_exist
 
 - name: Append blacklisted multipath.conf file
-  ansible.builtin.blockinfile:
+  blockinfile:
     path: /etc/multipath.conf
     marker: "# {mark} Append by ansible"
     block: "{{ lookup('file', './files/multipath.conf') }}"

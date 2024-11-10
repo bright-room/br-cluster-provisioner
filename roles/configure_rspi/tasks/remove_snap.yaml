@@ -6,6 +6,5 @@
 - name: Remove snapd package
   apt:
     name: snapd
-    update_cache: true
     autoremove: true
     state: absent

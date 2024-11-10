@@ -14,13 +14,13 @@
     path: "path=/etc/resolv.conf"
     state: absent
 
-- name: Copy resolv.conf file
-  copy:
+- name: Create resolv.conf file
+  template:
+    src: resolv.conf.j2
     dest: /etc/resolv.conf
-    src: files/resolv.conf
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
     backup: true
 
 - name: Change default GPU Memory Split
@@ -37,9 +37,9 @@
   replace: >-
     dest="/etc/systemd/timesyncd.conf"
     regexp="#NTP="
-    replace="NTP=ntp.{{ dns_domain }}"
+    replace="NTP={{ br_gateway1.ntp_domain }}"
 
 - name: Set timezone to Asia/Tokyo
   community.general.timezone:
-    name: Asia/Tokyo
+    name: "{{ timezone }}"
   notify: reboot

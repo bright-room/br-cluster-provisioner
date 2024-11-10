@@ -14,28 +14,25 @@
     name: "needrestart"
     state: absent
 
-- name: Register Docker repository
-  include_tasks: docker-repository-register.yaml
-
 - name: Install requirement packages
   apt:
     name: "{{ packages }}"
     state: present
   vars:
     packages:
-      - "git"
       - "dnsutils"
-      - "curl"
-      - "ca-certificates"
-      - "gnupg"
       - "netfilter-persistent"
       - "iptables-persistent"
-      - "nftables"
       - "lsof"
       - "net-tools"
       - "jq"
-      - "docker-ce"
-      - "docker-ce-cli"
-      - "containerd.io"
-      - "docker-buildx-plugin"
-      - "docker-compose-plugin"
+      - "isc-dhcp-server"
+      - "chrony"
+      - "wget"
+      - "tar"
+
+- name: Install etcd
+  include_tasks: install_etcd.yaml
+
+- name: Install coredns
+  include_tasks: install_coredns.yaml
