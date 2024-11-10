@@ -1,14 +1,90 @@
 ---
+##################################
+# ansible configuration
+##################################
 hostname: "br-gateway1"
 ansible_host: "192.168.2.50"
 ansible_ssh_private_key_file: "~/.ssh/br-gateway1"
-ip: "172.22.10.1"
-mac: "e4:5f:01:65:14:70"
 
-my_os_arch_arm_centric: arm64
+##################################
+# System configuration
+##################################
+tmp_dir: "/tmp"
+install_dir: "/usr/local/bin"
+
+##################################
+# DHCP configuration
+##################################
+dhcp:
+  cluster_cidr: 172.22.10.0
+  cluster_subnet: 255.255.255.0
+  cluster_subnet_cidr: 24
+  auto_allocation_ipaddr_range:
+    begin: 172.22.10.100
+    end: 172.22.10.200
+  static_allocation_ipaddr:
+    - host: "{{ br_gateway1.hostname }}"
+      ip: "{{ br_gateway1.ip }}"
+      mac: "{{ br_gateway1.mac }}"
+    - host: "{{ br_node1.hostname }}"
+      ip: "{{ br_node1.ip }}"
+      mac: "{{ br_node1.mac }}"
+    - host: "{{ br_node2.hostname }}"
+      ip: "{{ br_node2.ip }}"
+      mac: "{{ br_node2.mac }}"
+    - host: "{{ br_node3.hostname }}"
+      ip: "{{ br_node3.ip }}"
+      mac: "{{ br_node3.mac }}"
+    - host: "{{ br_node4.hostname }}"
+      ip: "{{ br_node4.ip }}"
+      mac: "{{ br_node4.mac }}"
+    - host: "{{ br_node5.hostname }}"
+      ip: "{{ br_node5.ip }}"
+      mac: "{{ br_node5.mac }}"
+    - host: "{{ br_node6.hostname }}"
+      ip: "{{ br_node6.ip }}"
+      mac: "{{ br_node6.mac }}"
+    - host: "{{ br_external1.hostname }}"
+      ip: "{{ br_external1.ip }}"
+      mac: "{{ br_external1.mac }}"
+
+##################################
+# DNS configuration
+##################################
+dns:
+  static_resolve:
+    - ip: "{{ br_gateway1.ip }}"
+      domains:
+        - "{{ br_gateway1.server_domain }}"
+        - "{{ br_gateway1.dns_domain }}"
+        - "{{ br_gateway1.ntp_domain }}"
+    - ip: "{{ br_node1.ip }}"
+      domains:
+        - "{{ br_node1.server_domain }}"
+    - ip: "{{ br_node2.ip }}"
+      domains:
+        - "{{ br_node2.server_domain }}"
+    - ip: "{{ br_node3.ip }}"
+      domains:
+        - "{{ br_node3.server_domain }}"
+    - ip: "{{ br_node4.ip }}"
+      domains:
+        - "{{ br_node4.server_domain }}"
+    - ip: "{{ br_node5.ip }}"
+      domains:
+        - "{{ br_node5.server_domain }}"
+    - ip: "{{ br_node6.ip }}"
+      domains:
+        - "{{ br_node6.server_domain }}"
+    - ip: "{{ br_external1.ip }}"
+      domains:
+        - "{{ br_external1.server_domain }}"
+        - "{{ br_external1.objects_domain }}"
+  daynamic_resolve:
+    store: "http://{{ br_gateway1.ip }}:2379"
 
 #################################
-# ipr-cnrs/nftables
+# ipr-cnrs/nftables　configuration
 #################################
 nft_old_pkg_list: []
 
@@ -104,7 +180,7 @@ nft_define:
     value: "{ docker0 }"
   lan network:
     name: lan_network
-    value: "172.22.10.0/24"
+    value: "{{ dhcp.cluster_cidr }}/{{ dhcp.cluster_subnet_cidr }}"
   forward tcp accept:
     name: forward_tcp_accept
     value: "{ http, https, ssh }"

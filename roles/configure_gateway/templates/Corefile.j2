@@ -1,0 +1,26 @@
+(common) {
+    cache
+    errors
+    loop
+    health :1053
+}
+
+{{ cluster_domain }}:53 {
+    hosts {
+{% for record in dns.static_resolve %}
+        {{ record.ip }}     {% for domain in record.domains %}{{ domain }} {% endfor %}
+
+{% endfor %}
+    }
+    etcd {
+        path /skydns
+        endpoint {{ dns.daynamic_resolve.store }}
+    }
+    import common
+}
+
+.:53 {
+    forward . {% for server in datasource.dns %}{{ server }}:53 {% endfor %}
+
+    import common
+}
