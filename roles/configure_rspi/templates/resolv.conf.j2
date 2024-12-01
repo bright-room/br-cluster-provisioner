@@ -1,4 +1,0 @@
-nameserver {{ br_gateway1.ip }}
-{% for dns_server in datasource.dns %}
-nameserver {{ dns_server }}
-{% endfor %}
