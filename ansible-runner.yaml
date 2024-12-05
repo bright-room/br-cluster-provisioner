@@ -1,0 +1,12 @@
+services:
+  ansible-runner:
+    build:
+      context: ./docker
+    environment:
+      SSH_AUTH_SOCK: /run/host-services/ssh-auth.sock
+      OP_CONNECT_TOKEN: ${OP_PROD_CONNECT_TOKEN}
+      OP_CONNECT_HOST: http://op-connect-api:8080
+    volumes:
+      - /run/host-services/ssh-auth.sock:/run/host-services/ssh-auth.sock
+      - ./ansible:/ansible
+    tty: true
