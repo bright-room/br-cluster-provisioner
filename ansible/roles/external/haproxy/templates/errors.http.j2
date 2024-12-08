@@ -1,0 +1,8 @@
+HTTP/1.0 {{ item.code }} {{ item.message }}
+Cache-Control: no-cache
+Connection: close
+Content-Type: application/json
+
+{
+  "message": "{{ item.message }}"
+}

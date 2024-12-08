@@ -1,0 +1,6 @@
+---
+install_packages:
+  - netfilter-persistent
+  - iptables-persistent
+  - isc-dhcp-server
+  - chrony

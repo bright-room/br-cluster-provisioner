@@ -1,0 +1,17 @@
+---
+- name: Create buckets
+  command:
+    cmd: "mc mb --ignore-existing {{ minio.provisioning.alias }}/{{ item.name }}"
+  with_items: "{{ minio.provisioning.buckets }}"
+
+- name: Copy buckets policy json
+  template:
+    src: "bucket-policy.json.j2"
+    dest: "/tmp/bucket-policy-{{ item.name }}.json"
+    mode: "0644"
+  with_items: "{{ minio.provisioning.buckets }}"
+
+- name: Attach buckets policy
+  command:
+    cmd: "mc anonymous set-json /tmp/bucket-policy-{{ item.name }}.json {{ minio.provisioning.alias }}/{{ item.name }}"
+  with_items: "{{ minio.provisioning.buckets }}"

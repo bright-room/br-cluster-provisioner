@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
+source {{ restic.config_dir }}/restic_common.sh
+
+echo "$(timestamp): restic-repo-clean started" | tee -a ${LOG_FILE}
+echo "-------------------------------------------------------------------------------" | tee -a ${LOG_FILE}
+
+${RESTIC} forget --keep-within {{ restic_config.environment.clean.forget_keep_within }} 2>&1 | tee -a ${LOG_FILE}
+${RESTIC} prune 2>&1 | tee -a ${LOG_FILE}
+
+echo "-------------------------------------------------------------------------------" | tee -a ${LOG_FILE}
+echo "$(timestamp): restic-repo-clean finished" | tee -a ${LOG_FILE}
+printf "\n" | tee -a ${LOG_FILE}
+
+exit 0

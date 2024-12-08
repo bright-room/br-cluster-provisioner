@@ -1,0 +1,32 @@
+---
+- name: Set version
+  set_fact:
+    restic_version: "0.17.3"
+
+- name: Get system architecture
+  command: dpkg --print-architecture
+  register: system_arch
+  changed_when: false
+
+- name: Download restic
+  get_url:
+    url: "https://github.com/restic/restic/releases/download/v{{ restic_version }}/restic_{{ restic_version }}_linux_{{ system_arch.stdout }}.bz2"
+    dest: "{{ tmp_dir }}/restic_{{ restic_version }}_linux_{{ system_arch.stdout }}.bz2"
+    mode: 0644
+
+- name: Extract restic
+  command: "bzip2 -d {{ tmp_dir }}/restic_{{ restic_version }}_linux_{{ system_arch.stdout }}.bz2"
+  args:
+    creates: "{{ tmp_dir }}/restic_{{ restic_version }}_linux_{{ system_arch.stdout }}"
+
+- name: Install restic
+  copy:
+    remote_src: true
+    src: "{{ tmp_dir }}/restic_{{ restic_version }}_linux_{{ system_arch.stdout }}"
+    dest: "{{ restic.binary_path }}"
+    mode: 0755
+
+- name: Remove downloaded file
+  file:
+    path: "{{ tmp_dir }}/restic_{{ restic_version }}_linux_{{ system_arch.stdout }}"
+    state: absent

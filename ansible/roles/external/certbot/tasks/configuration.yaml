@@ -1,0 +1,13 @@
+---
+- name: Add SSL certificate update cron
+  cron:
+    name: SSL certificate update
+    minute: "0"
+    hour: "0,12"
+    day: "*"
+    month: "*"
+    weekday: "*"
+    job: "python -c 'import random; import time; time.sleep(random.random() * 60)' && certbot renew"
+    user: "root"
+    disabled: false
+    state: present

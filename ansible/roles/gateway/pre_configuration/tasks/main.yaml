@@ -1,0 +1,29 @@
+---
+- name: Enable IPv4 forward
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: Configure iptables-persistent debconf settings
+  debconf:
+    name: iptables-persistent
+    question: "{{ item.question }}"
+    value: "{{ item.value }}"
+    vtype: boolean
+  loop:
+    - { question: 'iptables-persistent/autosave_v4', value: 'true' }
+    - { question: 'iptables-persistent/autosave_v6', value: 'true' }
+
+- name: Install requirement packages
+  apt:
+    name: "{{ install_packages }}"
+    state: present
+
+- name: Install etcd
+  include_tasks: install_etcd.yaml
+
+- name: Install coredns
+  include_tasks: install_coredns.yaml

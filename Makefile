@@ -28,3 +28,6 @@ runner-gateway-provisioner:
 runner-external-provisioner:
 	$(CONTAINER_EXEC) ansible-playbook -i inventory.yaml setup_cluster.yaml --tags "external"
 
+runner-backup-provisioner:
+	$(CONTAINER_EXEC) ansible-playbook -i inventory.yaml backup_configuration.yaml
+

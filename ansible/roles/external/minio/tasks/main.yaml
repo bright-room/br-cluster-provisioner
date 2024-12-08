@@ -1,0 +1,9 @@
+---
+- name: Pre setup
+  include_tasks: pre_setup.yaml
+
+- name: install
+  include_tasks: install.yaml
+
+- name: Minio configuration
+  include_tasks: configuration.yaml

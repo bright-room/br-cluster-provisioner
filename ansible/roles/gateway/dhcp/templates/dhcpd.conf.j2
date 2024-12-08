@@ -1,0 +1,31 @@
+#-------------------------------
+# Global options
+#-------------------------------
+authoritative;
+
+option domain-name "{{ cluster_domain }}";
+option domain-name-servers {{ br_gateway1.ip }};
+option routers {{ br_gateway1.ip }};
+
+default-lease-time 86400; # 24 hours.
+max-lease-time 604800; # 7 days.
+
+lease-file-name "/var/lib/dhcp/dhcpd.leases";
+
+#-------------------------------
+# Subnet
+#-------------------------------
+subnet {{ dhcp.cluster_cidr }} netmask {{ dhcp.cluster_subnet }} {
+  range {{ dhcp.auto_allocation_ipaddr_range.begin }} {{ dhcp.auto_allocation_ipaddr_range.end }};
+}
+
+#-------------------------------
+# Fixed address
+#-------------------------------
+{% for item in dhcp.static_allocation_ipaddr %}
+host {{ item.host | replace('br-', '') }} {
+  hardware ethernet {{ item.mac }};
+  fixed-address {{ item.ip }};
+}
+
+{% endfor %}
