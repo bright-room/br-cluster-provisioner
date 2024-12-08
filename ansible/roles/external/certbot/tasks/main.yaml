@@ -1,0 +1,6 @@
+---
+- name: install
+  include_tasks: install.yaml
+
+- name: Certificate configuration
+  include_tasks: configuration.yaml

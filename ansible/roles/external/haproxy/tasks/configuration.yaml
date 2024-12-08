@@ -1,0 +1,15 @@
+---
+- name: Create error files
+  template:
+    src: "errors.http.j2"
+    dest: "/etc/haproxy/errors/{{ item.code }}.http"
+    mode: "0644"
+  loop: "{{ haproxy.errors }}"
+
+- name: Create haproxy service file
+  template:
+    src: "haproxy.cfg.j2"
+    dest: "/etc/haproxy/haproxy.cfg"
+    mode: "0644"
+    validate: "haproxy -f %s -c -q"
+  notify: restart haproxy

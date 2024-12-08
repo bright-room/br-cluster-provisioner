@@ -1,0 +1,15 @@
+---
+- name: Check if restic is installed
+  stat:
+    path: "{{ restic.binary_path }}"
+  register: restic_binary
+
+- name: Install restic
+  include_tasks: install_restic.yaml
+  when: not restic_binary.stat.exists or restic.force_install
+
+- name: Restic configuration
+  include_tasks: configure_restic.yaml
+
+- name: Create restic service
+  include_tasks: create_restic_service.yaml

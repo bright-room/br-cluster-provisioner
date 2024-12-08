@@ -1,0 +1,11 @@
+---
+- name: Install requirement packages
+  apt:
+    name: chrony
+    state: present
+
+- name: Ensure chrony is running and enabled as configured.
+  systemd:
+    name: chrony
+    state: started
+    enabled: true

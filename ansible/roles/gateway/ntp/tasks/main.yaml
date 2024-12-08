@@ -1,0 +1,6 @@
+---
+- name: Install chrony package
+  include_tasks: install.yaml
+
+- name: Configure chrony
+  include_tasks: configuration.yaml

@@ -1,0 +1,9 @@
+---
+- name: Install requirement packages
+  include_tasks: install.yaml
+
+- name: Network configuration
+  include_tasks: network_configuration.yaml
+
+- name: Disable swap
+  include_tasks: disable_swap.yaml

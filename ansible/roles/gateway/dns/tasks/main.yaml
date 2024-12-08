@@ -1,0 +1,9 @@
+---
+- name: Install etcd
+  include_tasks: install_etcd.yaml
+
+- name: Install coredns
+  include_tasks: install_coredns.yaml
+
+- name: Configure CoreDNS
+  include_tasks: coredns_configuration.yaml

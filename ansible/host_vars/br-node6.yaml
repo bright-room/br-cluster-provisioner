@@ -1,0 +1,13 @@
+---
+##################################
+# ansible configuration
+##################################
+hostname: "br-node6"
+ansible_host: "172.22.10.72"
+ansible_ssh_private_key_file: "~/.ssh/br-node6"
+
+##################################
+# external disk configuration
+##################################
+volume_group: "vg_node"
+logical_volume: "lv_node"

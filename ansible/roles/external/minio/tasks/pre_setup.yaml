@@ -1,0 +1,78 @@
+---
+- name: Get email
+  onepassword.connect.field_info:
+    vault: "{{ vault_id }}"
+    item: "admin_mail_address"
+    field: "notesPlain"
+  no_log: true
+  register: email
+  become: false
+  delegate_to: localhost
+
+- name: Add minio operator
+  user:
+    name: "{{ minio.operator.user }}"
+    shell: "/usr/sbin/nologin"
+    create_home: false
+    system: true
+    state: present
+
+- name: Add minio group
+  group:
+    name: "{{ minio.operator.group }}"
+    state: present
+
+- name: Create directories
+  file:
+    path: "{{ item }}"
+    group: "minio"
+    owner: "minio"
+    mode: "0750"
+    state: directory
+  with_items:
+    - "{{ minio.data_store }}"
+    - "{{ minio.config_dir }}"
+    - "{{ minio.ssl_dir }}"
+    - "{{ minio.policy_dir }}"
+
+- name: Create SSL certificate
+  command: |
+    /lets_encrypt/bin/certbot certonly \
+      --dns-cloudflare \
+      --dns-cloudflare-credentials {{ lets_encrypt.virtual_environment }}/.secrets/cloudflare_credentials.ini \
+      --dns-cloudflare-propagation-seconds 60 \
+      --server https://acme-v02.api.letsencrypt.org/directory \
+      --agree-tos \
+      --non-interactive \
+      --rsa-key-size 4096 \
+      --email {{ email.field.value }} \
+      --domain {{ br_external1.backup_storage_domain }}
+  register: certbot_create
+  changed_when:
+    - certbot_create.rc==0
+    - '"Certificate not yet due for renewal; no action taken." not in certbot_create.stdout'
+
+- name: Copy public.crt
+  copy:
+    src: "{{ lets_encrypt.certificate_dir }}/{{ br_external1.backup_storage_domain }}/fullchain.pem"
+    dest: "{{ minio.ssl_dir }}/public.crt"
+    group: "minio"
+    owner: "minio"
+    remote_src: true
+
+- name: Copy private.key
+  copy:
+    src: "{{ lets_encrypt.certificate_dir }}/{{ br_external1.backup_storage_domain }}/privkey.pem"
+    dest: "{{ minio.ssl_dir }}/private.key"
+    group: "minio"
+    owner: "minio"
+    remote_src: true
+
+- name: Add certificate update script
+  template:
+    src: minio-ssl-update.sh.j2
+    dest: "{{ lets_encrypt.deploy_hook_dir }}/minio-ssl-update.sh"
+    owner: "root"
+    group: "root"
+    mode: "0700"
+    backup: true

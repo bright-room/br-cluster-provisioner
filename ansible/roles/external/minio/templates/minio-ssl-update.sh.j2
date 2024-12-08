@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+cp {{ lets_encrypt.certificate_dir }}/{{ br_external1.backup_storage_domain }}/fullchain.pem {{ minio.ssl_dir }}/public.key
+cp {{ lets_encrypt.certificate_dir }}/{{ br_external1.backup_storage_domain }}/privkey.pem {{ minio.ssl_dir }}/private.key
+chown -R minio:minio {{ minio.ssl_dir }}
+
+systemctl restart minio

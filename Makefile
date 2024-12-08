@@ -16,15 +16,18 @@ pre-setup:
 	docker compose --profile pre-setup build  && \
 	docker compose --profile pre-setup up -d
 
-runner-exec:
-	$(CONTAINER_EXEC) /bin/bash
-
 runner-setup:
 	$(CONTAINER_EXEC) ansible-galaxy install -r requirements.yaml
 
-runner-gateway-provisioner:
-	$(CONTAINER_EXEC) ansible-playbook -i inventory.yaml setup_cluster.yaml --tags "gateway"
+gateway-setup:
+	$(CONTAINER_EXEC) ansible-playbook -i inventory.yaml setup_gateway.yaml
 
-runner-external-provisioner:
-	$(CONTAINER_EXEC) ansible-playbook -i inventory.yaml setup_cluster.yaml --tags "external"
+external-setup:
+	$(CONTAINER_EXEC) ansible-playbook -i inventory.yaml setup_external.yaml
+
+node-setup:
+	$(CONTAINER_EXEC) ansible-playbook -i inventory.yaml setup_node.yaml
+
+backup-configuration:
+	$(CONTAINER_EXEC) ansible-playbook -i inventory.yaml backup_configuration.yaml
 

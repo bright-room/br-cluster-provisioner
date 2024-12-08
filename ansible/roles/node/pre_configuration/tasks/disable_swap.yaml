@@ -1,0 +1,14 @@
+---
+- name: Disable swap
+  command:
+    cmd: "swapoff -a"
+  when: ansible_swaptotal_mb > 0
+
+- name: Disable swap at boot
+  mount:
+    name: "{{ item }}"
+    fstype: swap
+    state: absent
+  with_items:
+    - "none"
+    - "swap"

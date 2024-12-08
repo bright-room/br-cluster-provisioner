@@ -1,0 +1,6 @@
+---
+- name: Install isc-dhcp-server packages
+  include_tasks: install.yaml
+
+- name: Configure isc-dhcp-server
+  include_tasks: configuration.yaml

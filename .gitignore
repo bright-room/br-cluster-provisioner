@@ -8,4 +8,5 @@
 ### projects ###
 .secret/.connect_token
 .secret/1password-credentials.json
+.secret/config
 /.env

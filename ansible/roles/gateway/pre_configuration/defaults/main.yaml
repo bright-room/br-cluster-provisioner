@@ -1,0 +1,4 @@
+---
+install_packages:
+  - netfilter-persistent
+  - iptables-persistent

@@ -1,0 +1,45 @@
+---
+- name: Configure external server
+  hosts: external
+  gather_facts: true
+  become: true
+
+  collections:
+    - onepassword.connect
+
+  vars:
+    op_connect_token:
+
+  environment:
+    OP_CONNECT_TOKEN: "{{ lookup('env', 'OP_CONNECT_TOKEN') }}"
+    OP_CONNECT_HOST: "{{ lookup('env', 'OP_CONNECT_HOST') }}"
+
+  pre_tasks:
+    - name: package update
+      include_tasks: tasks/update.yaml
+      tags: [ "always" ]
+
+    - name: Setup Initialize disk
+      include_tasks: tasks/init_disk.yaml
+      tags: [ "system" ]
+
+  roles:
+    - name: Setup system configuration role
+      role: system_setup
+      tags: [ "system" ]
+
+    - name: Pre setup external configuration role
+      role: external/pre_configuration
+      tags: [ "system" ]
+
+    - name: Certbot configuration role
+      role: external/certbot
+      tags: [ "certbot" ]
+
+    - name: Haproxy configuration role
+      role: external/haproxy
+      tags: [ "haproxy" ]
+
+    - name: Minio configuration role
+      role: external/minio
+      tags: [ "minio" ]

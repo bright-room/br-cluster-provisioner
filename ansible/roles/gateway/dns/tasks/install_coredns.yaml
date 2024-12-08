@@ -1,0 +1,69 @@
+---
+- name: Get system architecture
+  command: dpkg --print-architecture
+  register: system_arch
+  changed_when: false
+
+- name: Set CoreDNS base variables
+  set_fact:
+    coredns_version: "1.11.3"
+
+- name: Create CoreDNS config directory
+  file:
+    path: "/etc/coredns"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+    state: directory
+
+- name: Download CoreDNS archive
+  get_url:
+    url: "https://github.com/coredns/coredns/releases/download/v{{ coredns_version }}/coredns_{{ coredns_version }}_linux_{{ system_arch.stdout }}.tgz"
+    dest: "{{ tmp_dir }}/coredns_{{ coredns_version }}_linux_{{ system_arch.stdout }}.tgz"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+- name: "Extract CoreDNS to {{ tmp_dir }}"
+  unarchive:
+    src: "{{ tmp_dir }}/coredns_{{ coredns_version }}_linux_{{ system_arch.stdout }}.tgz"
+    dest: "{{ tmp_dir }}"
+    owner: "root"
+    group: "root"
+    remote_src: true
+
+- name: "Copy CoreDNS binary to {{ install_dir }}"
+  copy:
+    src: "{{ item.source }}"
+    dest: "{{ item.target }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+    remote_src: true
+  with_items:
+    - source: "{{ tmp_dir }}/coredns"
+      target: "{{ install_dir }}/coredns"
+
+- name: Create CoreDNS systemd service file
+  template:
+    src: "coredns.service.j2"
+    dest: "/etc/systemd/system/coredns.service"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+- name: Disable and Stop systemd-resolved
+  systemd:
+    name: systemd-resolved
+    state: stopped
+    enabled: false
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: true
+
+- name: Enable and start CoreDNS
+  systemd:
+    name: coredns
+    state: started
+    enabled: true

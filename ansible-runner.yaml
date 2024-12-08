@@ -9,4 +9,5 @@ services:
     volumes:
       - /run/host-services/ssh-auth.sock:/run/host-services/ssh-auth.sock
       - ./ansible:/ansible
+      - ./.secret:/.secret
     tty: true

@@ -1,0 +1,28 @@
+- name: Create K3S configuration directory
+  file:
+    path: "{{ k3s.config_dir }}"
+    state: directory
+
+- name: Generate k3s token file
+  copy:
+    content: "{{ cluster_token.field.value }}"
+    dest: "{{ k3s.config_dir }}/cluster-token"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+- name: Copy kubelet configuration file
+  template:
+    src: "kubelet.config.j2"
+    dest: "{{ k3s.config_dir }}/kubelet.config"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+- name: Copy k3s configuration file
+  template:
+    src: "config.yaml.j2"
+    dest: "{{ k3s.config_dir }}/config.yaml"
+    owner: "root"
+    group: "root"
+    mode: "0644"
