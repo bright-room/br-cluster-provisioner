@@ -1,0 +1,60 @@
+---
+- name: Get minio user
+  onepassword.connect.field_info:
+    vault: "{{ vault_id }}"
+    item: "minio-operators"
+    section: "{{ item.name }}"
+    field: "username"
+  register: minio_user
+  become: false
+  delegate_to: localhost
+
+- name: Get minio password
+  onepassword.connect.field_info:
+    vault: "{{ vault_id }}"
+    item: "minio-operators"
+    section: "{{ item.name }}"
+    field: "password"
+  register: minio_password
+  become: false
+  delegate_to: localhost
+
+- name: Check whether user is already configured
+  command:
+    cmd: "mc admin user info {{ minio.provisioning.alias }} {{ minio_user.field.value }}"
+  register: existing_users
+  changed_when: false
+  ignore_errors: true
+
+- name: Create if not exist user
+  block:
+    - name: Create user
+      command:
+        cmd: "mc admin user add {{ minio.provisioning.alias }} {{ minio_user.field.value }} {{ minio_password.field.value }}"
+      register: created_user
+      changed_when: '"Added user `" + minio_user.field.value + "` successfully" in created_user.stdout'
+
+    - name: Copy bucket acl json
+      template:
+        src: "user-policy.json.j2"
+        dest: "{{ minio.policy_dir }}/user-policy-{{ minio_user.field.value }}.json"
+        owner: "{{ minio.operator.user }}"
+        group: "{{ minio.operator.group }}"
+        mode: "0640"
+      register: create_policy
+
+    - name: Create user policy
+      command:
+        cmd: "mc admin policy create {{ minio.provisioning.alias }} {{ minio_user.field.value }}-policy {{ minio.policy_dir }}/user-policy-{{ minio_user.field.value }}.json"
+      register: created_user_policy
+      when: create_policy.changed
+      changed_when: '"Added policy `" + minio_user.field.value + "` successfully" in created_user_policy.stdout'
+
+    - name: Apply user policy
+      command: "mc admin policy attach {{ minio.provisioning.alias }} {{ minio_user.field.value }}-policy -u {{ minio_user.field.value }}"
+      register: apply_policy
+      when: create_policy.changed
+      changed_when: '"Policy `" + minio_user.field.value + "` is set on user `" + minio_user.field.value + "`" in apply_policy.stdout'
+  when:
+    - existing_users.rc==1
+    - '"Unable to get user info" in existing_users.stderr'

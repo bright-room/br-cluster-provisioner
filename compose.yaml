@@ -1,0 +1,31 @@
+services:
+  op-connect-api:
+    extends:
+      service: op-connect-api
+      file: ./onepassword-connect.yaml
+    volumes:
+      - data:/home/opuser/.op/data
+    profiles:
+      - pre-setup
+      - clean
+  op-connect-sync:
+    extends:
+      service: op-connect-sync
+      file: ./onepassword-connect.yaml
+    volumes:
+      - data:/home/opuser/.op/data
+    profiles:
+      - pre-setup
+      - clean
+
+  ansible-runner:
+    extends:
+      service: ansible-runner
+      file: ./ansible-runner.yaml
+    profiles:
+      - pre-setup
+      - runner
+      - clean
+
+volumes:
+  data:

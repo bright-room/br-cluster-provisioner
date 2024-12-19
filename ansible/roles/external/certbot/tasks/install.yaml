@@ -1,0 +1,53 @@
+---
+- name: Get cloudflare api token
+  onepassword.connect.field_info:
+    vault: "{{ vault_id }}"
+    item: "cloudflare_api_token"
+    field: "notesPlain"
+  no_log: true
+  register: cloudflare_token
+  become: false
+  delegate_to: localhost
+
+- name: Delete old working directories
+  file:
+    path: "{{ lets_encrypt.virtual_environment }}"
+    state: absent
+
+- name: Create working directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0644"
+  with_items:
+    - "{{ lets_encrypt.virtual_environment }}"
+    - "{{ lets_encrypt.virtual_environment }}/logs"
+    - "{{ lets_encrypt.virtual_environment }}/config"
+
+- name: Create secret directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0700"
+  with_items:
+    - "{{ lets_encrypt.virtual_environment }}/.secrets"
+
+- name: Install certbot and cloudflare plugin in virtual environment
+  pip:
+    name: "{{ item }}"
+    virtualenv: "{{ lets_encrypt.virtual_environment }}"
+    virtualenv_command: "python3 -m venv"
+    state: present
+  with_items:
+    - "certbot"
+    - "certbot-dns-cloudflare"
+
+- name: Create Cloudflare secret file
+  lineinfile:
+    path: "{{ lets_encrypt.virtual_environment }}/.secrets/cloudflare_credentials.ini"
+    line: "dns_cloudflare_api_token={{ cloudflare_token.field.value }}"
+    create: true
+    state: present
+    owner: root
+    group: root
+    mode: "0600"

@@ -1,0 +1,72 @@
+Host *
+	IdentityAgent "/run/host-services/ssh-auth.sock"
+
+Host br-gateway1
+  HostName 192.168.2.50
+  Port 22
+  User bradmin
+  IdentityFile ~/.ssh/br-gateway1.pub
+  ForwardAgent yes
+  StrictHostKeyChecking no
+
+Host br-external1
+  HostName 172.22.10.80
+  Port 22
+  User bradmin
+  IdentityFile ~/.ssh/br-external1.pub
+  ForwardAgent yes
+  StrictHostKeyChecking no
+  ProxyJump br-gateway1
+
+Host br-node1
+  HostName 172.22.10.60
+  Port 22
+  User bradmin
+  IdentityFile ~/.ssh/br-node1.pub
+  ForwardAgent yes
+  StrictHostKeyChecking no
+  ProxyJump br-gateway1
+
+Host br-node2
+  HostName 172.22.10.61
+  Port 22
+  User bradmin
+  IdentityFile ~/.ssh/br-node2
+  ForwardAgent yes
+  StrictHostKeyChecking no
+  ProxyJump br-gateway1
+
+Host br-node3
+  HostName 172.22.10.62
+  Port 22
+  User bradmin
+  ForwardAgent yes
+  StrictHostKeyChecking no
+  ProxyJump br-gateway1
+
+Host br-node4
+  HostName 172.22.10.70
+  Port 22
+  User bradmin
+  IdentityFile ~/.ssh/br-node4
+  ForwardAgent yes
+  StrictHostKeyChecking no
+  ProxyJump br-gateway1
+
+Host br-node5
+  HostName 172.22.10.71
+  Port 22
+  User bradmin
+  IdentityFile ~/.ssh/br-node5
+  ForwardAgent yes
+  StrictHostKeyChecking no
+  ProxyJump br-gateway1
+
+Host br-node6
+  HostName 172.22.10.72
+  Port 22
+  User bradmin
+  IdentityFile ~/.ssh/br-node6
+  ForwardAgent yes
+  StrictHostKeyChecking no
+  ProxyJump br-gateway1
