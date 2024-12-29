@@ -1,0 +1,43 @@
+---
+- name: Get system architecture
+  command:
+    cmd: "dpkg --print-architecture"
+  register: system_arch
+  changed_when: false
+
+- name: Get latest stable Cilium CLI version
+  uri:
+    url: https://dl.k8s.io/release/stable.txt
+    return_content: yes
+  register: kubectl_version
+
+- name: Set download URL
+  set_fact:
+    download_url: "https://dl.k8s.io/release/{{ kubectl_version.content | trim }}/bin/linux/{{ system_arch.stdout }}/kubectl"
+
+- name: Download kubectl binary
+  get_url:
+    url: "{{ item }}"
+    dest: "{{ tmp_dir }}/{{ item | basename }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  with_items:
+    - "{{ download_url }}"
+    - "{{ download_url }}.sha256"
+
+- name: Verify checksum
+  command:
+    cmd: "echo {{ tmp_dir }}/kubectl.sha256 kubectl | sha256sum --check"
+  args:
+    chdir: "{{ tmp_dir }}"
+  changed_when: false
+
+- name: Copy kubectl binary
+  copy:
+    src: "{{ tmp_dir }}/kubectl"
+    dest: "{{ install_dir }}/kubectl"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+    remote_src: true

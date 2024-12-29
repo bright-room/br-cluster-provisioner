@@ -1,0 +1,10 @@
+---
+- name: Configure gateway cluster
+  hosts: all
+  gather_facts: true
+  become: true
+
+  roles:
+    - name: Backup configuration role
+      role: cluster/backup
+      tags: [ "backup" ]

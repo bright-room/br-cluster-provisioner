@@ -1,0 +1,10 @@
+---
+- name: Remove packages
+  apt:
+    name: "{{ uninstall_packages }}"
+    state: absent
+
+- name: Install requirement packages
+  apt:
+    name: "{{ install_packages }}"
+    state: present

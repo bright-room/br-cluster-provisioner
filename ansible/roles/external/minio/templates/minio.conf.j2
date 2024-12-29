@@ -1,0 +1,10 @@
+MINIO_VOLUMES="{{ minio.data_store }}"
+
+MINIO_OPTS="--address :{{ minio.server.app_port }} --console-address :{{ minio.server.console_port }} --certs-dir {{ minio.ssl_dir }}"
+
+MINIO_ROOT_USER="{{ minio_admin_user.field.value }}"
+MINIO_ROOT_PASSWORD="{{ minio_admin_password.field.value }}"
+MINIO_SITE_REGION="{{ minio.provisioning.region }}"
+
+MINIO_SERVER_URL="https://{{ br_external1.backup_storage_domain }}:{{ minio.server.app_port }}"
+MINIO_DOMAIN="https://{{ br_external1.backup_storage_domain }}:{{ minio.server.app_port }}"

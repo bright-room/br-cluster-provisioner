@@ -1,0 +1,5 @@
+---
+- name: Install requirement packages
+  apt:
+    name: "{{ install_packages }}"
+    state: present

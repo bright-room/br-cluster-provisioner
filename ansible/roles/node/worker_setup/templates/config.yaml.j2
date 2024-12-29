@@ -1,0 +1,6 @@
+server: https://{{ k3s_api_vip }}:{{ k3s.cluster.port }}
+token-file: {{ k3s.config_dir }}/cluster-token
+node-label:
+  - node_type=worker
+kubelet-arg:
+  - config={{ k3s.config_dir }}/kubelet.config

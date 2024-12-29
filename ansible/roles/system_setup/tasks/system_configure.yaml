@@ -1,0 +1,69 @@
+---
+- name: Append hosts
+  blockinfile:
+    path: "/etc/hosts"
+    marker: "# {mark} Append by ansible"
+    block: "127.0.1.1 {{ hostname }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+    state: present
+
+- name: Update DNS server
+  lineinfile:
+    dest: "/etc/systemd/resolved.conf"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    mode: "0644"
+    backup: true
+    state: present
+  with_items:
+    - regexp: "^#DNS="
+      line: "DNS={{ br_gateway1.ip }}"
+    - regexp: "^#Domains="
+      line: "Domains={{ br_gateway1.dns_domain }}"
+    - regexp: "^#FallbackDNS="
+      line: "FallbackDNS=8.8.8.8 8.8.4.4"
+  notify: restart systemd-resolved
+
+- name: Change default GPU Memory Split
+  blockinfile:
+    path: /boot/firmware/config.txt
+    marker: "# {mark} Append by ansible"
+    block: "gpu_mem=16"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+    state: present
+
+- name: Read current cmdline.txt content
+  command:
+    cmd: "cat /boot/firmware/cmdline.txt"
+  register: cmdline_content
+  changed_when: false
+
+- name: Add cgroup parameters if not present
+  lineinfile:
+    path: "/boot/firmware/cmdline.txt"
+    regexp: '^((?!.*\bcgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory\b).*)$'
+    line: '\1 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory'
+    backrefs: true
+
+- name: Update NTP server
+  lineinfile:
+    dest: /etc/systemd/timesyncd.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    mode: "0644"
+    backup: true
+    state: present
+  with_items:
+    - regexp: "^#NTP="
+      line: "NTP={{ br_gateway1.ntp_domain }}"
+    - regexp: "^#FallbackNTP="
+      line: "FallbackNTP=ntp1.jst.mfeed.ad.jp ntp2.jst.mfeed.ad.jp ntp3.jst.mfeed.ad.jp"
+
+- name: Set timezone to Asia/Tokyo
+  community.general.timezone:
+    name: "{{ timezone }}"
+  notify: reboot

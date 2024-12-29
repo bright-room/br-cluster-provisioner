@@ -1,0 +1,35 @@
+---
+- name: Get minio root user
+  onepassword.connect.field_info:
+    vault: "{{ vault_id }}"
+    item: "minio-admin"
+    field: "username"
+  no_log: true
+  register: minio_admin_user
+  become: false
+  delegate_to: localhost
+
+- name: Get minio root password
+  onepassword.connect.field_info:
+    vault: "{{ vault_id }}"
+    item: "minio-admin"
+    field: "password"
+  no_log: true
+  register: minio_admin_password
+  become: false
+  delegate_to: localhost
+
+- name: Configure minio connection alias
+  command: "mc alias set {{ minio.provisioning.alias }} https://{{ br_external1.backup_storage_domain }}:{{ minio.server.app_port }} {{ minio_admin_user.field.value }} {{ minio_admin_password.field.value }}"
+  register: alias_command
+  changed_when: false
+  failed_when: '"Added `" + minio.provisioning.alias + "` successfully" not in alias_command.stdout'
+
+- name: Create buckets
+  include_tasks: create_bucket.yaml
+
+- name: Create users
+  include_tasks: create_user.yaml
+  with_items: "{{ minio.provisioning.users }}"
+  loop_control:
+    loop_var: item

@@ -1,0 +1,23 @@
+---
+- name: Configure default isc-dhcp-server
+  lineinfile:
+    dest: "/etc/default/isc-dhcp-server"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    mode: "0644"
+    backup: true
+    state: present
+  with_items:
+    - regexp: "^#DHCPDv4_CONF=/etc/dhcp/dhcpd.conf"
+      line: "DHCPDv4_CONF=/etc/dhcp/dhcpd.conf"
+    - regexp: '^INTERFACESv4=""'
+      line: 'INTERFACESv4="{{ br_gateway1.cluster_network_interface }}"'
+
+- name: Configure /etc/dhcp/dhcp.conf
+  template:
+    src: "dhcpd.conf.j2"
+    dest: "/etc/dhcp/dhcpd.conf"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  notify: restart isc-dhcp-server

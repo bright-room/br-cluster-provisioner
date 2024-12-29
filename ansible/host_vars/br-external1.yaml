@@ -1,0 +1,133 @@
+---
+##################################
+# ansible configuration
+##################################
+hostname: "br-external1"
+ansible_host: "172.22.10.80"
+ansible_ssh_private_key_file: "~/.ssh/br-external1"
+
+##################################
+# external disk configuration
+##################################
+volume_group: "vg_external"
+logical_volume: "lv_external"
+
+##################################
+# haproxy configuration
+##################################
+haproxy:
+  clusters:
+    - node: master1
+      ip: "{{ br_node1.ip }}"
+    - node: master2
+      ip: "{{ br_node2.ip }}"
+    - node: master3
+      ip: "{{ br_node3.ip }}"
+  errors:
+    - code: "400"
+      message: "Bad Request"
+    - code: "403"
+      message: "Forbidden"
+    - code: "408"
+      message: "Request Timeout"
+    - code: "500"
+      message: "Internal Server Error"
+    - code: "502"
+      message: "Bad Gateway"
+    - code: "503"
+      message: "Service Unavailable"
+    - code: "504"
+      message: "Gateway Time-out"
+
+##################################
+# let's encrypt configuration
+##################################
+lets_encrypt:
+  virtual_environment: /lets_encrypt
+  certificate_dir: /etc/letsencrypt/live
+  deploy_hook_dir: /etc/letsencrypt/renewal-hooks/deploy
+
+##################################
+# minio configuration
+##################################
+minio:
+  data_store: /storage/minio
+  config_dir: /etc/minio
+  ssl_dir: /etc/minio/ssl
+  policy_dir: /etc/minio/policy
+  server:
+    app_port: 9000
+    console_port: 9001
+  operator:
+    user: minio
+    group: minio
+  provisioning:
+    alias: backup-storage
+    region: ap-northeast-1
+    buckets:
+      - name: restic
+        policy: read-write
+      - name: k3s-longhorn
+        policy: read-write
+      - name: k3s-velero
+        policy: read-write
+      - name: k3s-loki
+        policy: read-write
+      - name: k3s-tempo
+        policy: read-write
+      - name: k3s-barman
+        policy: read-write
+    users:
+      - name: restic
+        bucket_acl:
+          bucket_name: restic
+          attach_policy: read-write
+      - name: longhorn
+        bucket_acl:
+          bucket_name: k3s-longhorn
+          attach_policy: read-write
+      - name: velero
+        bucket_acl:
+          bucket_name: k3s-velero
+          attach_policy: custom
+          definition:
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "s3:GetObject"
+                  - "s3:DeleteObject"
+                  - "s3:PutObject"
+                  - "s3:AbortMultipartUpload"
+                  - "s3:ListMultipartUploadParts"
+                Resource:
+                  - "arn:aws:s3:::k3s-velero/*"
+              - Effect: "Allow"
+                Action:
+                  - "s3:ListBucket"
+                Resource:
+                  - "arn:aws:s3:::k3s-velero"
+      - name: loki
+        bucket_acl:
+          bucket_name: k3s-loki
+          attach_policy: read-write
+      - name: tempo
+        bucket_acl:
+          bucket_name: k3s-tempo
+          attach_policy: custom
+          definition:
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "s3:PutObject"
+                  - "s3:GetObject"
+                  - "s3:ListBucket"
+                  - "s3:DeleteObject"
+                  - "s3:GetObjectTagging"
+                  - "s3:PutObjectTagging"
+                Resource:
+                  - "arn:aws:s3:::k3s-tempo/*"
+                  - "arn:aws:s3:::k3s-tempo"
+      - name: barman
+        bucket_acl:
+          bucket_name: k3s-barman
+          attach_policy: read-write

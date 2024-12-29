@@ -1,0 +1,27 @@
+---
+- name: Get K3s installation script
+  get_url:
+    url: https://get.k3s.io
+    dest: "{{ tmp_dir }}/k3s_install.sh"
+    mode: "0755"
+
+- name: Install K3s
+  command: "{{ tmp_dir }}/k3s_install.sh server"
+  changed_when: true
+
+- name: Create directory .kube
+  file:
+    path: "/home/{{ ansible_user }}/.kube"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
+    state: directory
+
+- name: Copy config file to user home directory
+  copy:
+    src: "{{ k3s.config_dir }}/k3s.yaml"
+    dest: "/home/{{ ansible_user }}/.kube/config"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0644"
+    remote_src: true

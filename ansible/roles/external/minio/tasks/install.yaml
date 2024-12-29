@@ -1,0 +1,55 @@
+---
+- name: Get minio root user
+  onepassword.connect.field_info:
+    vault: "{{ vault_id }}"
+    item: "minio-admin"
+    field: "username"
+  no_log: true
+  register: minio_admin_user
+  become: false
+  delegate_to: localhost
+
+- name: Get minio root password
+  onepassword.connect.field_info:
+    vault: "{{ vault_id }}"
+    item: "minio-admin"
+    field: "password"
+  no_log: true
+  register: minio_admin_password
+  become: false
+  delegate_to: localhost
+
+- name: Get system architecture
+  command: dpkg --print-architecture
+  register: system_arch
+  changed_when: false
+
+- name: Download minio binary archive
+  get_url:
+    url: "https://dl.min.io/server/minio/release/linux-{{ system_arch.stdout }}/minio"
+    dest: "{{ install_dir }}/minio"
+    mode: "0755"
+
+- name: Download minio-cli binary archive
+  get_url:
+    url: "https://dl.minio.io/client/mc/release/linux-{{ system_arch.stdout }}/mc"
+    dest: "{{ install_dir }}/mc"
+    mode: "0755"
+
+- name: Copy minio config
+  template:
+    src: "minio.conf.j2"
+    dest: "/etc/minio/minio.conf"
+    mode: "0640"
+
+- name: Copy minio service
+  template:
+    src: "minio.service.j2"
+    dest: "/etc/systemd/system/minio.service"
+    mode: "0640"
+
+- name: Enable and start minio
+  systemd:
+    name: minio
+    state: started
+    enabled: true

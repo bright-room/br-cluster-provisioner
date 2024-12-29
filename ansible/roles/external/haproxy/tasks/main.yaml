@@ -1,0 +1,6 @@
+---
+- name: Install haproxy package
+  include_tasks: install.yaml
+
+- name: Configure haproxy
+  include_tasks: configuration.yaml

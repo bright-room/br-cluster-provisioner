@@ -1,0 +1,38 @@
+{
+  "Version": "2012-10-17",
+  {% if item.bucket_acl.attach_policy == 'read-write' %}
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:DeleteObject",
+        "s3:GetObject",
+        "s3:ListBucket",
+        "s3:PutObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::{{item.bucket_acl.bucket_name }}",
+        "arn:aws:s3:::{{item.bucket_acl.bucket_name }}/*"
+      ]
+    }
+  ]
+  {% endif %}
+  {% if item.bucket_acl.attach_policy == 'read-only' %}
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::{{ item.bucket_acl.bucket_name }}",
+        "arn:aws:s3:::{{ item.bucket_acl.bucket_name }}/*"
+      ]
+    }
+  ]
+  {% endif %}
+  {% if item.bucket_acl.attach_policy == 'custom' %}
+  {{ item.bucket_acl.definition | to_nice_json(indent=2) | regex_replace('^\\{|\\}$', '') }}
+  {% endif %}
+}

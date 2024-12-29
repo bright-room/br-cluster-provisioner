@@ -1,0 +1,111 @@
+---
+##################################
+# Ansible configuration
+##################################
+ansible_user: bradmin
+
+##################################
+# 1Password configuration
+##################################
+vault_id: "y35lzgdl67zdypf3ijvkvein6e"
+
+##################################
+# System configuration
+##################################
+tmp_dir: "/tmp"
+install_dir: "/usr/local/bin"
+
+##################################
+# Cluster configuration
+##################################
+cluster_domain: bright-room.net
+br_gateway1:
+  hostname: br-gateway1
+  server_domain: "gateway1.{{ cluster_domain }}"
+  dns_domain: "dns.{{ cluster_domain }}"
+  ntp_domain: "ntp.{{ cluster_domain }}"
+  ip: 172.22.10.1
+  mac: e4:5f:01:65:14:70
+  external_network_interface: wlan0
+  cluster_network_interface: eth0
+br_node1:
+  hostname: br-node1
+  server_domain: "node1.{{ cluster_domain }}"
+  ip: 172.22.10.60
+  mac: d8:3a:dd:7f:89:51
+  cluster_network_interface: eth0
+br_node2:
+  hostname: br-node2
+  server_domain: "node2.{{ cluster_domain }}"
+  ip: 172.22.10.61
+  mac: d8:3a:dd:75:fa:14
+  cluster_network_interface: eth0
+br_node3:
+  hostname: br-node3
+  server_domain: "node3.{{ cluster_domain }}"
+  ip: 172.22.10.62
+  mac: d8:3a:dd:75:f8:b5
+  cluster_network_interface: eth0
+br_node4:
+  hostname: br-node4
+  server_domain: "node4.{{ cluster_domain }}"
+  ip: 172.22.10.70
+  mac: d8:3a:dd:43:97:c1
+  cluster_network_interface: eth0
+br_node5:
+  hostname: br-node5
+  server_domain: "node5.{{ cluster_domain }}"
+  ip: 172.22.10.71
+  mac: d8:3a:dd:43:8b:be
+  cluster_network_interface: eth0
+br_node6:
+  hostname: br-node6
+  server_domain: "node6.{{ cluster_domain }}"
+  ip: 172.22.10.72
+  mac: d8:3a:dd:27:29:4a
+  cluster_network_interface: eth0
+br_external1:
+  hostname: br-external1
+  server_domain: "external1.{{ cluster_domain }}"
+  backup_storage_domain: "backup-storage.{{ cluster_domain }}"
+  ip: 172.22.10.80
+  mac: dc:a6:32:94:5f:d6
+  cluster_network_interface: eth0
+
+timezone: "Asia/Tokyo"
+
+##################################
+# restic configuration
+##################################
+restic:
+  binary_path: "{{ install_dir }}/restic"
+  force_install: false
+  config_dir: "/etc/restic"
+  operator:
+    user: "root"
+    group: "root"
+
+restic_config:
+  file_path: "{{ restic.config_dir }}/restic.conf"
+  environment:
+    repository: "s3:https://{{ br_external1.backup_storage_domain }}:9000/restic"
+    log_dir_path: "/var/log"
+    log_file_prefix: "restic"
+    backup_dirs:
+      - path: "/etc"
+      - path: "/var/log"
+      - path: "/root"
+        exclude:
+          - pattern: ".cache"
+          - pattern: ".ignore"
+      - path: "/home/bradmin"
+        exclude:
+          - pattern: ".cache"
+          - pattern: ".ignore"
+    backup:
+      scheduling: "*-*-* 03:00:00"
+      randomized_delay_sec: 0
+    clean:
+      scheduling: "*-*-* 06:00:00"
+      randomized_delay_sec: 0
+      forget_keep_within: "7d"

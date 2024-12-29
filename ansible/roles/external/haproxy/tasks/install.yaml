@@ -1,0 +1,11 @@
+---
+- name: Install haproxy package
+  apt:
+    name: haproxy
+    state: present
+
+- name: Enable and start haproxy
+  systemd:
+    name: haproxy
+    state: started
+    enabled: true

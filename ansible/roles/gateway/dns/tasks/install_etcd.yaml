@@ -1,0 +1,67 @@
+---
+- name: Get system architecture
+  command: dpkg --print-architecture
+  register: system_arch
+  changed_when: false
+
+- name: Set etcd base variables
+  set_fact:
+    etcd_version: "v3.5.16"
+
+- name: Create etcd data directory
+  file:
+    path: "/var/lib/etcd"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+    state: directory
+
+- name: Download etcd archive
+  get_url:
+    url: "https://github.com/etcd-io/etcd/releases/download/{{ etcd_version }}/etcd-{{ etcd_version }}-linux-{{ system_arch.stdout }}.tar.gz"
+    dest: "{{ tmp_dir }}/etcd-{{ etcd_version }}-linux-{{ system_arch.stdout }}.tar.gz"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+- name: "Extract etcd to {{ tmp_dir }}"
+  unarchive:
+    src: "{{ tmp_dir }}/etcd-{{ etcd_version }}-linux-{{ system_arch.stdout }}.tar.gz"
+    dest: "{{ tmp_dir }}"
+    owner: "root"
+    group: "root"
+    remote_src: true
+
+- name: "Copy etcd binary to {{ install_dir }}"
+  copy:
+    src: "{{ item.source }}"
+    dest: "{{ item.target }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+    remote_src: true
+  with_items:
+    - source: "{{ tmp_dir }}/etcd-{{ etcd_version }}-linux-{{ system_arch.stdout }}/etcd"
+      target: "{{ install_dir }}/etcd"
+    - source: "{{ tmp_dir }}/etcd-{{ etcd_version }}-linux-{{ system_arch.stdout }}/etcdctl"
+      target: "{{ install_dir }}/etcdctl"
+    - source: "{{ tmp_dir }}/etcd-{{ etcd_version }}-linux-{{ system_arch.stdout }}/etcdutl"
+      target: "{{ install_dir }}/etcdutl"
+
+- name: Create etcd systemd service file
+  template:
+    src: "etcd.service.j2"
+    dest: "/etc/systemd/system/etcd.service"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: true
+
+- name: Enable and start etcd
+  systemd:
+    name: etcd
+    state: started
+    enabled: true

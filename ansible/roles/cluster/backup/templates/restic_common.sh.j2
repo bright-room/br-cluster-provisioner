@@ -1,0 +1,13 @@
+export RESTIC={{ restic.binary_path }}
+
+export RESTIC_REPOSITORY={{ restic_config.environment.repository }}
+export RESTIC_PASSWORD={{ restic_password.field.value }}
+
+export LOG_FILE={{ restic_config.environment.log_dir_path }}/{{ restic_config.environment.log_file_prefix }}_$(date +%Y%m%d).log
+
+export AWS_ACCESS_KEY_ID={{ minio_user.field.value }}
+export AWS_SECRET_ACCESS_KEY={{ minio_password.field.value }}
+
+function timestamp() {
+  date "+%Y-%m-%d'T'%H:%M:%S"
+}

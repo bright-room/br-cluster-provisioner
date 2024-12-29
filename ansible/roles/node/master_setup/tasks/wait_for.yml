@@ -1,0 +1,8 @@
+---
+- name: Check that the control plane is available to accept connections
+  wait_for:
+    host: "{{ primary_control_node_ip_address }}"
+    port: "{{ k3s.cluster.port }}"
+    delay: 5
+    sleep: 5
+    timeout: 300

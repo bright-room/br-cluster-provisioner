@@ -1,0 +1,9 @@
+---
+- name: Create CoreDNS configuration
+  template:
+    src: "Corefile.j2"
+    dest: "/etc/coredns/Corefile"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  notify: restart coredns

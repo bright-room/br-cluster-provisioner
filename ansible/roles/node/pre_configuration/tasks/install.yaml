@@ -1,0 +1,39 @@
+---
+- name: Install requirement packages
+  apt:
+    name: "{{ install_packages }}"
+    state: present
+
+- name: Enable and start iscsid
+  systemd:
+    name: iscsid
+    state: started
+    enabled: true
+
+- name: Check if Cilium binary exists.
+  stat:
+    path: "/usr/local/bin/cilium"
+  register: cilium_check
+
+- name: Install cilium
+  include_tasks: install_cilium.yaml
+  when: "not cilium_check.stat.exists"
+
+- name: Check if Helm binary exists.
+  stat:
+    path: "/usr/local/bin/helm"
+  register: helm_check
+
+- name: Install helm
+  include_tasks: install_helm.yaml
+  when: "not helm_check.stat.exists"
+
+- name: Check if kubectl binary exists.
+  stat:
+    path: "/usr/local/bin/kubectl"
+  register: kubectl_check
+
+- name: Install helm
+  include_tasks: install_kubectl.yaml
+  when: "not kubectl_check.stat.exists"
+

@@ -1,0 +1,39 @@
+---
+- name: Determine if it is a primary control node
+  set_fact:
+    is_primary_control_node: true
+  when:
+    - "inventory_hostname == br_node1.hostname"
+
+- name: Obtain the IP address of the primary control node
+  set_fact:
+    primary_control_node_ip_address: "{{ br_node1.ip }}"
+
+- name: Get k3s cluster token password
+  onepassword.connect.field_info:
+    vault: "{{ vault_id }}"
+    item: "k3s_token"
+    field: "notesPlain"
+  no_log: true
+  register: cluster_token
+  become: false
+  delegate_to: localhost
+
+- name: Create configuration
+  include_tasks: create_configuration.yaml
+
+- name: Install primary master
+  include_tasks: install.yaml
+  when:
+    - is_primary_control_node
+
+- name: Install secondary masters in case of HA mode
+  block:
+    - name: Wait for primary master
+      include_tasks: wait_for.yml
+
+    - name: Install secondary master
+      include_tasks: install.yaml
+  throttle: 1
+  when:
+    - not is_primary_control_node

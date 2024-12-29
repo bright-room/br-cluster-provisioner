@@ -1,0 +1,20 @@
+---
+- name: Obtain the IP address of the k3s vip
+  set_fact:
+    k3s_api_vip: "{{ br_external1.ip }}"
+
+- name: Get k3s cluster token password
+  onepassword.connect.field_info:
+    vault: "{{ vault_id }}"
+    item: "k3s_token"
+    field: "notesPlain"
+  no_log: true
+  register: cluster_token
+  become: false
+  delegate_to: localhost
+
+- name: Create configuration
+  include_tasks: create_configuration.yaml
+
+- name: Install worker
+  include_tasks: install.yaml

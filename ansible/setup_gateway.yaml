@@ -1,0 +1,35 @@
+---
+- name: Configure gateway server
+  hosts: gateway
+  gather_facts: true
+  become: true
+
+  pre_tasks:
+    - name: package update
+      include_tasks: tasks/update.yaml
+      tags: [ "always" ]
+
+  roles:
+    - name: Setup system configuration role
+      role: system_setup
+      tags: [ "system" ]
+
+    - name: Pre setup gateway configuration role
+      role: gateway/pre_configuration
+      tags: [ "system" ]
+
+    - name: DHCP configuration role
+      role: gateway/dhcp
+      tags: [ "dhcp" ]
+
+    - name: DNS configuration role
+      role: gateway/dns
+      tags: [ "dns" ]
+
+    - name: NTP configuration role
+      role: gateway/ntp
+      tags: [ "ntp" ]
+
+    - name: Firewall configuration role
+      role: ipr-cnrs.nftables
+      tags: [ "firewall" ]
