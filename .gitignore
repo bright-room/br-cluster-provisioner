@@ -6,6 +6,8 @@
 *.iml
 
 ### projects ###
+/.kube/cache/
+/.kube/config
 .secret/.connect_token
 .secret/1password-credentials.json
 .secret/config
