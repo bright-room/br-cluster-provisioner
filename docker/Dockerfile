@@ -19,7 +19,7 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
     install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
 
-FROM python:3.13.2-slim-bullseye
+FROM python:3.13.3-slim-bullseye
 
 COPY --from=builder /usr/bin/op /usr/bin/
 COPY --from=builder /usr/local/bin/kubectl /usr/local/bin/
