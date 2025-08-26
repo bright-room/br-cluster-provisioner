@@ -1,7 +1,7 @@
 ---
 roles:
   - name: ipr-cnrs.nftables
-    version: v2.2.4
+    version: v2.2.5
 
 collections:
   - name: community.general
