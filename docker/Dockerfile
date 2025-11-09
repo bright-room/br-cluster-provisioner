@@ -18,7 +18,6 @@ RUN curl -sS https://downloads.1password.com/linux/keys/1password.asc | gpg --de
 RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/arm64/kubectl" && \
     install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
-
 FROM python:3.13.6-slim-bullseye
 
 COPY --from=builder /usr/bin/op /usr/bin/
@@ -30,7 +29,8 @@ RUN apt-get update && \
 
 COPY ssh/ /root/.ssh/
 RUN chmod 700 /root/.ssh && \
+    chmod 700 /root/.ssh/1Password && \
     chmod 600 /root/.ssh/config && \
-    chmod 600 /root/.ssh/*.pub
+    chmod 600 /root/.ssh/1Password/config
 
 WORKDIR /ansible
