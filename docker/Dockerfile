@@ -29,8 +29,6 @@ RUN apt-get update && \
 
 COPY ssh/ /root/.ssh/
 RUN chmod 700 /root/.ssh && \
-    chmod 700 /root/.ssh/1Password && \
-    chmod 600 /root/.ssh/config && \
-    chmod 600 /root/.ssh/1Password/config
+    chmod 600 /root/.ssh/config
 
 WORKDIR /ansible
