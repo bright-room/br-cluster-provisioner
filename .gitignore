@@ -8,7 +8,7 @@
 ### projects ###
 /.kube/cache/
 /.kube/config
-.secret/.connect_token
-.secret/1password-credentials.json
-.secret/config
+.secret/
+!.secret/dev/.gitkeep
+!.secret/prod/.gitkeep
 /.env

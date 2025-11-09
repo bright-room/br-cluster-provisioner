@@ -1,14 +1,28 @@
 services:
-  ansible-runner:
+  dev-ansible-runner:
+    build:
+      context: ./docker
+    environment:
+      SSH_AUTH_SOCK: /run/host-services/ssh-auth.sock
+      OP_CONNECT_TOKEN: ${OP_DEV_CONNECT_TOKEN}
+      OP_CONNECT_HOST: http://dev-op-connect-api:8080
+    volumes:
+      - /run/host-services/ssh-auth.sock:/run/host-services/ssh-auth.sock
+      - ./ansible:/ansible
+      - ./.secret/dev:/.secret
+      - ./.kube/dev:/root/.kube
+    tty: true
+
+  prod-ansible-runner:
     build:
       context: ./docker
     environment:
       SSH_AUTH_SOCK: /run/host-services/ssh-auth.sock
       OP_CONNECT_TOKEN: ${OP_PROD_CONNECT_TOKEN}
-      OP_CONNECT_HOST: http://op-connect-api:8080
+      OP_CONNECT_HOST: http://prod-op-connect-api:8080
     volumes:
       - /run/host-services/ssh-auth.sock:/run/host-services/ssh-auth.sock
       - ./ansible:/ansible
-      - ./.secret:/.secret
-      - ./.kube:/root/.kube
+      - ./.secret/prod:/.secret
+      - ./.kube/prod:/root/.kube
     tty: true

@@ -1,31 +1,58 @@
 services:
-  op-connect-api:
+  dev-op-connect-api:
     extends:
-      service: op-connect-api
+      service: dev-op-connect-api
       file: ./onepassword-connect.yaml
     volumes:
-      - data:/home/opuser/.op/data
+      - dev-data:/home/opuser/.op/data
     profiles:
-      - pre-setup
+      - bootstrap
       - clean
-  op-connect-sync:
+  dev-op-connect-sync:
     extends:
-      service: op-connect-sync
+      service: dev-op-connect-sync
       file: ./onepassword-connect.yaml
     volumes:
-      - data:/home/opuser/.op/data
+      - dev-data:/home/opuser/.op/data
     profiles:
-      - pre-setup
+      - bootstrap
+      - clean
+  prod-op-connect-api:
+    extends:
+      service: prod-op-connect-api
+      file: ./onepassword-connect.yaml
+    volumes:
+      - prod-data:/home/opuser/.op/data
+    profiles:
+      - bootstrap
+      - clean
+  prod-op-connect-sync:
+    extends:
+      service: prod-op-connect-sync
+      file: ./onepassword-connect.yaml
+    volumes:
+      - prod-data:/home/opuser/.op/data
+    profiles:
+      - bootstrap
       - clean
 
-  ansible-runner:
+  dev-ansible-runner:
     extends:
-      service: ansible-runner
+      service: dev-ansible-runner
       file: ./ansible-runner.yaml
     profiles:
-      - pre-setup
+      - bootstrap
+      - runner
+      - clean
+  prod-ansible-runner:
+    extends:
+      service: prod-ansible-runner
+      file: ./ansible-runner.yaml
+    profiles:
+      - bootstrap
       - runner
       - clean
 
 volumes:
-  data:
+  dev-data:
+  prod-data:
